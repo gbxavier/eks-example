@@ -1,7 +1,10 @@
 const express = require('express')
-const app = express()
+
+// Global constants
 const port = process.env.PORT || 8080;
 
+// The APP!
+const app = express()
 app.get('/', (req, res) => {
   let message = 'Welcome to 2022. '
   message += `Hey, just a note... Your User Agent is "${req.get('User-Agent')}"`
