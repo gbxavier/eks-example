@@ -38,3 +38,32 @@ resource "aws_subnet" "private" {
     )
   }
 }
+
+resource "aws_eip" "nat" {
+  count = length(local.azs)
+
+  vpc = true
+
+  tags = {
+    "Name" = format(
+      "${local.eip_prefix}-nat-%s",
+      local.azs[count.index]
+    )
+  }
+}
+
+resource "aws_nat_gateway" "this" {
+  count = length(local.azs)
+
+  allocation_id = aws_eip.nat[count.index].id
+  subnet_id     = aws_subnet.public[count.index].id
+
+  tags = {
+    "Name" = format(
+      "${local.ngw_prefix}-%s",
+      local.azs[count.index]
+    )
+  }
+
+  depends_on = [aws_internet_gateway.this]
+}
