@@ -6,6 +6,9 @@ TF_BACKEND_TEMPLATE_FILE?=infrastructure/tf-backend/tf-backend.cfn.yaml
 TF_BACKEND_BUCKET_STATE_NAME?=eks-example-tf-backend-001
 TF_BACKEND_BUCKET_STATE_LOG_NAME?=eks-example-tf-backend-logs-001
 TF_BACKEND_LOCK_TABLE_NAME?=eks-example-tf-backend-lock
+TF_BACKENV_CONFIG_FILE?=backend-config/eu-west-1-production.tfvars
+TF_ENV_FILE?=env/eu-west-1-production.tfvars
+TF_ROOT_DIR?=infrastructure/cluster
 
 LOCAL_IMAGE_NAME=${IMAGE_NAME}:${IMAGE_TAG}
 LOCAL_DOCKER_CONTAINER_NAME=eks-example
@@ -17,7 +20,7 @@ help:
 	@echo
 	@echo 'Targets:'
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep  \
-	| sed -e 's/^\(.*\):[^#]*#\(.*\)/\1 \2/' | tr '#' "\t"
+		| sed -e 's/^\(.*\):[^#]*#\(.*\)/\1 \2/' | tr '#' "\t"
 
 docker-build: ## Build the service's docker image
 	docker build \
@@ -52,3 +55,24 @@ aws-cfn-tf-backend-delete: ## Delete TF's backend infrastructure
 		cloudformation \
 		delete-stack \
 		--stack-name ${TF_BACKEND_STACK_NAME} \
+
+tf-init: ## Initialize terraform with S3 backend
+	@cd ${TF_ROOT_DIR} && echo "Temporarily changed to directory '${TF_ROOT_DIR}'" && \
+	terraform \
+		init \
+		-backend-config=${TF_BACKENV_CONFIG_FILE} && \
+	cd - > /dev/null
+tf-plan: ## Plan changes on the infrastructure
+	@cd ${TF_ROOT_DIR} && echo "Temporarily changed to directory '${TF_ROOT_DIR}'" && \
+	terraform \
+		plan \
+		-var-file=${TF_ENV_FILE} && \
+	cd - > /dev/null
+
+tf-apply: ## Apply changes on the infrastructure
+	@cd ${TF_ROOT_DIR} && echo "Temporarily changed to directory '${TF_ROOT_DIR}'" && \
+	terraform \
+		apply \
+		-auto-approve \
+		-var-file=${TF_ENV_FILE} && \
+	cd - > /dev/null
