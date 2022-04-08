@@ -24,6 +24,7 @@ help:
 
 docker-build: ## Build the service's docker image
 	docker build \
+		--platform linux/amd64 \
 	    -t ${LOCAL_IMAGE_NAME} \
 	    .
 
@@ -82,4 +83,25 @@ tf-console: ## Open TF Console
 	terraform \
 		console \
 		-var-file=${TF_ENV_FILE} && \
+	cd - > /dev/null
+
+eks-get-credentials: ## Get eks credentials
+	@cd ${TF_ROOT_DIR} && echo "Temporarily changed to directory '${TF_ROOT_DIR}'" && \
+	aws \
+		eks \
+		--region $$(terraform output -raw region) \
+		update-kubeconfig \
+		--name $$(terraform output -raw cluster_name)  && \
+	cd - > /dev/null
+
+ecr-get-login-password: ## Get ECR credentials
+	@cd ${TF_ROOT_DIR} && echo "Temporarily changed to directory '${TF_ROOT_DIR}'" && \
+	aws \
+		ecr \
+		get-login-password \
+		--region eu-west-1 \
+		| docker \
+			login \
+			--username AWS \
+			--password-stdin 315380288412.dkr.ecr.eu-west-1.amazonaws.com && \
 	cd - > /dev/null
