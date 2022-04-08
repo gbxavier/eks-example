@@ -18,10 +18,7 @@ resource "aws_subnet" "public" {
   cidr_block        = var.public_subnets[count.index]
   availability_zone = element(local.azs, count.index)
   tags = {
-    "Name" = format(
-      "${local.public_subnet_prefix}-%s",
-      element(local.azs, count.index),
-    )
+    "Name" = "${local.public_subnet_prefix}-${local.azs[count.index]}"
   }
 }
 
@@ -32,10 +29,7 @@ resource "aws_subnet" "private" {
   cidr_block        = var.private_subnets[count.index]
   availability_zone = element(local.azs, count.index)
   tags = {
-    "Name" = format(
-      "${local.private_subnet_prefix}-%s",
-      element(local.azs, count.index),
-    )
+    "Name" = "${local.private_subnet_prefix}-${local.azs[count.index]}"
   }
 }
 
@@ -45,10 +39,7 @@ resource "aws_eip" "nat" {
   vpc = true
 
   tags = {
-    "Name" = format(
-      "${local.eip_prefix}-nat-%s",
-      local.azs[count.index]
-    )
+    "Name" = "${local.eip_prefix}-nat-${local.azs[count.index]}"
   }
 }
 
@@ -59,10 +50,7 @@ resource "aws_nat_gateway" "this" {
   subnet_id     = aws_subnet.public[count.index].id
 
   tags = {
-    "Name" = format(
-      "${local.ngw_prefix}-%s",
-      local.azs[count.index]
-    )
+    "Name" = "${local.ngw_prefix}-${local.azs[count.index]}"
   }
 
   depends_on = [aws_internet_gateway.this]
