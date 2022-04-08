@@ -2,6 +2,10 @@
 
 This repository has the source code to deploy an EKS cluster using terraform and deploy a simple application written in NodeJS.
 
+## Application
+
+This simple application will only reply with "Welcome to 2022" and let you know what is your user agent :D
+
 ## Infrastructure
 
 This section details all the infrastructure pieces that are deployed with this code
