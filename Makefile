@@ -76,3 +76,10 @@ tf-apply: ## Apply changes on the infrastructure
 		-auto-approve \
 		-var-file=${TF_ENV_FILE} && \
 	cd - > /dev/null
+
+tf-console: ## Open TF Console
+	@cd ${TF_ROOT_DIR} && echo "Temporarily changed to directory '${TF_ROOT_DIR}'" && \
+	terraform \
+		console \
+		-var-file=${TF_ENV_FILE} && \
+	cd - > /dev/null

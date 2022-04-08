@@ -4,4 +4,5 @@ locals {
   private_subnet_prefix = "eks-private"
   eip_prefix            = "eks-eip"
   ngw_prefix            = "eks-ngw"
+  rt_prefix             = "eks-rt"
 }
