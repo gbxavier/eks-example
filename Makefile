@@ -78,6 +78,14 @@ tf-apply: ## Apply changes on the infrastructure
 		-var-file=${TF_ENV_FILE} && \
 	cd - > /dev/null
 
+tf-destroy: ## Nuke the infrastructure
+	@cd ${TF_ROOT_DIR} && echo "Temporarily changed to directory '${TF_ROOT_DIR}'" && \
+	terraform \
+		destroy \
+		-auto-approve \
+		-var-file=${TF_ENV_FILE} && \
+	cd - > /dev/null
+
 tf-console: ## Open TF Console
 	@cd ${TF_ROOT_DIR} && echo "Temporarily changed to directory '${TF_ROOT_DIR}'" && \
 	terraform \
