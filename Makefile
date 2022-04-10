@@ -9,6 +9,9 @@ TF_BACKEND_LOCK_TABLE_NAME?=eks-example-tf-backend-lock
 TF_BACKENV_CONFIG_FILE?=backend-config/eu-west-1-production.tfvars
 TF_ENV_FILE?=env/eu-west-1-production.tfvars
 TF_ROOT_DIR?=infrastructure/cluster
+DOCKER_REGISTRY?=315380288412.dkr.ecr.eu-west-1.amazonaws.com
+KUBE_NAMESPACE?=eks-example
+HELM_CHART_PATH?=./deploy
 
 LOCAL_IMAGE_NAME=${IMAGE_NAME}:${IMAGE_TAG}
 LOCAL_DOCKER_CONTAINER_NAME=eks-example
@@ -38,6 +41,10 @@ docker-run: ## Runs the image locally
 docker-stop: ## Stops the running container
 	docker stop \
 		${LOCAL_DOCKER_CONTAINER_NAME}
+
+docker-publish: ecr-get-login-password ## Publishes the newly built image to the registry
+	@docker push \
+		${LOCAL_IMAGE_NAME}
 
 aws-cfn-tf-backend-provision: ## Deploy TF's backend infrastructure
 	aws \
@@ -111,5 +118,22 @@ ecr-get-login-password: ## Get ECR credentials
 		| docker \
 			login \
 			--username AWS \
-			--password-stdin 315380288412.dkr.ecr.eu-west-1.amazonaws.com && \
+			--password-stdin ${DOCKER_REGISTRY} && \
 	cd - > /dev/null
+
+helm-template: ## Runs Helm's template engine (Development Only)
+	@helm -n ${KUBE_NAMESPACE} \
+		template \
+		eks-example \
+		${HELM_CHART_PATH} \
+		--set image.name=${IMAGE_NAME} \
+		--set image.tag=${IMAGE_TAG}
+
+helm-upgrade: ## Deploys the application
+	helm -n ${KUBE_NAMESPACE} \
+		upgrade \
+		eks-example \
+		${HELM_CHART_PATH} \
+		--install \
+		--set image.name=${IMAGE_NAME} \
+		--set image.tag=${IMAGE_TAG}
